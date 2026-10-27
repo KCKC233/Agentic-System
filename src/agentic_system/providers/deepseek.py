@@ -12,6 +12,13 @@ class DeepSeekModelClient:
         self._client = client
         self._model = model
 
+
+
+
+
+
+
+
     def complete(
         self,
         messages: Sequence[Message],
@@ -23,11 +30,22 @@ class DeepSeekModelClient:
             self._to_provider_message(message) for message in messages
         ]
 
+        provider_tools = [
+            self._to_provider_tool_spec(tool_spec) for tool_spec in tools
+        ]
+
         # TODO 2: Make the API request shown above.
-        response = self._client.chat.completions.create(
-            model=self._model,
-            messages=provider_messages
-        )
+        if provider_tools:
+            response = self._client.chat.completions.create(
+                model=self._model,
+                messages=provider_messages,
+                tools=provider_tools
+            )
+        else:
+            response = self._client.chat.completions.create(
+                model=self._model,
+                messages=provider_messages
+            )
 
         # TODO 3: Check that response.choices is not empty.
         # For now, raise ValueError if the provider returned no choices.
