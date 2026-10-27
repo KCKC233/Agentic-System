@@ -1,4 +1,4 @@
-"""Provider-independent message contracts for the agentic system.
+"""Provider-independent message and tool-call contracts for the agentic system.
 
 Implementation exercise: define the types below using typed dataclasses.
 This outline is pseudocode, not an implemented API.
@@ -50,6 +50,11 @@ class ToolCall:
     name: str
     arguments: dict[str, JSONValue]
 
+@dataclass
+class ToolResultMessage:
+    tool_call_id: str
+    content: str
+    is_error: bool
 
 @dataclass
 class SystemMessage:
@@ -64,15 +69,39 @@ class AssistantMessage:
     content: str | None
     tool_calls: list[ToolCall]
 
-@dataclass
-class ToolResultMessage:
-    tool_call_id: str
-    content: str
-    is_error: bool
-
 
 Message: TypeAlias = (SystemMessage | UserMessage | AssistantMessage | ToolResultMessage)
 conversation: list[Message]
+
+
+@dataclass
+class ToolSpec:
+    name: str
+    description: str
+    input_schema: dict[str, JSONValue]
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("Tool name cannot be blank or whitespace-only.")
+        
+        if not self.description.strip():
+            raise ValueError("Tool description cannot be blank or whitespace-only.")
+
+        if self.input_schema.get("type") != "object":
+            raise ValueError("Tool input_schema must have type 'object'.")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -106,4 +135,3 @@ if __name__ == "__main__":
         is_error=False
     )
     print(f"toolresultmessage: {toolresultmessage}")
-
